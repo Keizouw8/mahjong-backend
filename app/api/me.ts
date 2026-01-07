@@ -1,15 +1,15 @@
 import type { Request, Response } from "express";
-import { User, Room } from "../../database/models";
+import { Room } from "../../database/models";
 import getUsername from "../../database/getUsername";
 
 type RoomType = {
 	name: string,
-	users: string[]
+	users: string[],
+	id: string
 }
 
-export default async function signup(req: Request, res: Response) {
+export default async function me(req: Request, res: Response) {
 	let user = req.user;
-
 	let rooms: RoomType[] = [];
 
 	for(let i = 0; i < user.rooms.length; i++){
@@ -20,7 +20,8 @@ export default async function signup(req: Request, res: Response) {
 		}
 
 		let users: string[] = [];
-		for(let o = 0; 0 < room.users.length; o++){
+
+		for(let o = 0; o < room.users.length; o++){
 			let user = await getUsername(room.users[o]);
 			if(!user){
 				room.users.splice(i, 1);
@@ -29,7 +30,7 @@ export default async function signup(req: Request, res: Response) {
 			users.push(user);
 		}
 
-		rooms.push({ name: room.name, users });
+		rooms.push({ name: room.name, users, id: room._id.toString() });
 
 		room.markModified("users");
 		await room.save();
